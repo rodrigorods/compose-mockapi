@@ -1,7 +1,7 @@
 package com.rodrigorods.events.model
 
 data class Event(
-    val id: Long,
+    val id: String,
     val date: Long,
     val title: String,
     val description: String,

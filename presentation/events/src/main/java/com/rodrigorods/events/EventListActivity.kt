@@ -1,6 +1,7 @@
 package com.rodrigorods.events
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -15,12 +16,12 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -29,11 +30,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
+import androidx.core.os.bundleOf
+import androidx.navigation.NavController
+import androidx.navigation.Navigator
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import coil.compose.AsyncImage
 import com.rodrigorods.events.model.Event
+import com.rodrigorods.events.navigation.NavGraph
+import com.rodrigorods.events.navigation.Screens
 import com.rodrigorods.events.theme.ComposeEventListTheme
 import org.koin.androidx.compose.koinViewModel
-
 
 class EventListActivity : ComponentActivity() {
 
@@ -46,7 +53,8 @@ class EventListActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    val navController = rememberNavController()
+                    NavGraph(navController = navController)
                 }
             }
         }
@@ -54,13 +62,22 @@ class EventListActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainScreen(
+fun EventListScreen(
+    navController: NavController,
     viewModel: EventListViewModel = koinViewModel(),
     modifier: Modifier = Modifier
 ) {
     when(val uiState = viewModel.uiState.collectAsState().value) {
         is UIState.FullPageLoading -> FullScreenLoading()
-        is UIState.DisplayingEventList -> CharacterList(data = uiState.eventList)
+        is UIState.DisplayingEventList ->
+            CharacterList(
+                data = uiState.eventList,
+                onEventClick = { eventId ->
+                    navController.navigate(
+                        route = "${Screens.Detail.route}/$eventId"
+                    )
+                }
+            )
         else -> FullScreenRetryMessage(modifier = modifier)
     }
 }
@@ -86,7 +103,7 @@ fun FullScreenLoading() {
 }
 
 @Composable
-fun CharacterList(data: List<Event>) {
+fun CharacterList(data: List<Event>, onEventClick: (String) -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -97,20 +114,25 @@ fun CharacterList(data: List<Event>) {
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             items(data.size) { index ->
-                EventListRow(data[index])
+                EventListRow(data[index], onEventClick)
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EventListRow(content: Event) {
+fun EventListRow(content: Event, onEventClick: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxSize(),
+        onClick = {
+            Log.e("TESTE", "CLICOU :${content.id}")
+            onEventClick(content.id)
+        }
     ) {
         ConstraintLayout(
             modifier = Modifier
-                .background(color = Color.Gray.copy(alpha = 0.3f))
+                .background(color = Color.Gray.copy(alpha = 0.15f))
                 .fillMaxWidth()
                 .wrapContentHeight()
         ) {
