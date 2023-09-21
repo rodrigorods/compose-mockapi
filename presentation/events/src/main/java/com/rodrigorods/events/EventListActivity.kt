@@ -3,15 +3,18 @@ package com.rodrigorods.events
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -30,6 +33,7 @@ import coil.compose.AsyncImage
 import com.rodrigorods.events.model.Event
 import com.rodrigorods.events.theme.ComposeEventListTheme
 import org.koin.androidx.compose.koinViewModel
+
 
 class EventListActivity : ComponentActivity() {
 
@@ -86,7 +90,12 @@ fun CharacterList(data: List<Event>) {
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        LazyColumn {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
             items(data.size) { index ->
                 EventListRow(data[index])
             }
@@ -96,60 +105,55 @@ fun CharacterList(data: List<Event>) {
 
 @Composable
 fun EventListRow(content: Event) {
-    ConstraintLayout(
-        modifier = Modifier
-            .padding(12.dp)
-            .fillMaxWidth()
+    Card(
+        modifier = Modifier.fillMaxSize(),
     ) {
-        val (thumbnail, name, description, divider) = createRefs()
-
-        AsyncImage(
-            model = content.image,
-            contentDescription = null,
+        ConstraintLayout(
             modifier = Modifier
-                .size(120.dp)
-                .padding(end = 6.dp)
-                .constrainAs(thumbnail) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                },
-            contentScale = ContentScale.Crop,
-            alignment = Alignment.TopStart
-        )
-        Text(
-            text = content.title,
-            modifier = Modifier
-                .constrainAs(name) {
-                    top.linkTo(thumbnail.top)
-                    start.linkTo(thumbnail.end)
-                    width = Dimension.fillToConstraints
-                }
+                .background(color = Color.Gray.copy(alpha = 0.3f))
                 .fillMaxWidth()
-        )
-        Text(
-            text = content.description,
-            maxLines = 2,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier
-                .constrainAs(description) {
-                    start.linkTo(thumbnail.end)
-                    end.linkTo(parent.end)
-                    top.linkTo(name.bottom)
-                    width = Dimension.fillToConstraints
-                }
-        )
+                .wrapContentHeight()
+        ) {
+            val (thumbnail, name, description) = createRefs()
 
-        Divider(
-            modifier = Modifier
-                .constrainAs(divider) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                }
-                .fillMaxWidth(),
-            color = Color.Gray,
-            thickness = 4.dp
-        )
+            AsyncImage(
+                model = content.image,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(90.dp)
+                    .constrainAs(thumbnail) {
+                        top.linkTo(parent.top)
+                        start.linkTo(parent.start)
+                    },
+                contentScale = ContentScale.Crop,
+            )
+            Text(
+                text = content.title,
+                style = MaterialTheme.typography.headlineMedium,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .constrainAs(name) {
+                        top.linkTo(thumbnail.top)
+                        start.linkTo(thumbnail.end)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+                    .fillMaxWidth()
+            )
+            Text(
+                text = content.description,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .constrainAs(description) {
+                        start.linkTo(thumbnail.end)
+                        end.linkTo(parent.end)
+                        top.linkTo(name.bottom)
+                        width = Dimension.fillToConstraints
+                    }
+            )
+        }
     }
 }
 
