@@ -1,10 +1,6 @@
 package com.rodrigorods.events.navigation
 
-import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.navigation.NamedNavArgument
-import androidx.navigation.NavArgument
-import androidx.navigation.NavArgumentBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -26,9 +22,8 @@ fun NavGraph(navController: NavHostController){
             route = "${Screens.Detail.route}/{eventID}",
             arguments = listOf(navArgument("eventID") { type = NavType.StringType })
         ){
-            val eventIdArg = it.arguments?.getString("eventID")
-            Log.e("TESTE", "ID :$eventIdArg")
-            EventDetailScreen(navController)
+            val eventIdArg = it.arguments?.getString("eventID") ?: ""
+            EventDetailScreen(eventIdArg, navController)
         }
     }
 }
